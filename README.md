@@ -8,11 +8,13 @@ GCR is a tool that allows you to edit Nintendo GameCube images.
 
 GCR can be built via any C# IDE or a CLI command like `msbuild GCRebuilder.sln`
 
-## Original Developer Comments
+## Usage
 
-GCR was written a long time ago and thus have some nasty problems:
-- poor overall code quality
-- windows-only GUI
-- others I just don't remember
+Export file/folder from image: `--extract iso_path folder_path`
+Import file/folder from image: `--import iso_path folder_path`
+Rebuild image from folder: `--rebuild folder_path iso_path <--noGameTOC>`
 
-I don't think I will have time to do necessary refactoring, bugfixes or improvements.
+## Recognition
+
+Special thanks to BSV for creating the original tool.
+

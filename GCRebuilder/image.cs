@@ -241,7 +241,7 @@ namespace GCRebuilder
         public void Export(string expPath)
         {
             expImpPath = expPath;
-            expImpIdx = Convert.ToInt32(selNode.Name);
+            //expImpIdx = Convert.ToInt32(selNode.Name);
             if (toc.fils[expImpIdx].isDir)
                 ExportDir();
             else

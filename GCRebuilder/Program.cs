@@ -20,16 +20,21 @@ namespace GCRebuilder
                 {
                     MainForm mf = new GCRebuilder.MainForm(args);
 
-                    if (mf.IsImagePath(args[0]))
+                    if (mf.IsImagePath(args[1]))
                     {
-                        if (args.Length == 4)
+                        if (args.Length == 3)
                         {
-                            mf.ImageOpen(args[0]);
-                            mf.SetSelectedNode(args[1]);
-                            if (args[2].Equals("e"))
-                                mf.Export(args[3]);
-                            else if (args[2].Equals("i"))
-                                mf.Import(args[3]);
+
+                            if (args[0].Equals("--extract"))
+                            {
+                                mf.ImageOpen(args[1]);
+                                mf.Export(args[2]);
+                            }
+                            else if (args[0].Equals("--import"))
+                            {
+                                mf.ImageOpen(args[1]);
+                                mf.Import(args[2]);
+                            }
                             else
                                 Usage();
                         }
@@ -38,12 +43,22 @@ namespace GCRebuilder
                             Usage();
                         }
                     }
-                    else if (mf.IsRootPath(args[0]))
+                    else if (mf.IsRootPath(args[1]))
                     {
-                        if (args.Length == 2)
+                        if (args.Length >= 3)
                         {
-                            mf.RootOpen(args[0]);
-                            mf.Rebuild(args[1]);
+                            if (args[0].Equals("--rebuild"))
+                            {
+                                if (args[3].Equals("--noGameTOC"))
+                                {
+                                    mf.RootOpen(args[1], true);
+                                }
+                                else
+                                {
+                                    mf.RootOpen(args[1], false);
+                                }
+                                mf.Rebuild(args[2]);
+                            }
                         }
                         else
                         {
@@ -81,8 +96,7 @@ namespace GCRebuilder
 
         static void Usage()
         {
-            Console.WriteLine("iso_path [node_path e|i file_or_folder]");
-            Console.WriteLine("root_path [iso_path]");
+            Console.WriteLine("--extract|import|rebuild iso_path folder_path");
         }
 
         [DllImport("kernel32.dll")]

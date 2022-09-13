@@ -217,7 +217,7 @@ namespace GCRebuilder
                 if (IsImagePath(arg))
                     ImageOpen(arg);
                 else if (IsRootPath(arg))
-                    RootOpen(arg);
+                    RootOpen(arg, miOptionsDoNotUseGameToc.Checked);
             }
             catch (Exception ex)
             {
@@ -286,7 +286,7 @@ namespace GCRebuilder
             pbBDBanner.Invalidate();
         }
 
-        public void RootOpen(string path)
+        public void RootOpen(string path, bool useTOC)
         {
             FolderBrowserDialog fbd;
             string PrevPath = resPath;
@@ -315,7 +315,7 @@ namespace GCRebuilder
 
             success = CheckResPath();
             if (success)
-                if (miOptionsDoNotUseGameToc.Checked)
+                if (useTOC)
                     success = GenerateTOC();
                 else
                     if (success)
@@ -613,7 +613,7 @@ namespace GCRebuilder
 
         private void miRootOpen_Click(object sender, EventArgs e)
         {
-            RootOpen("");
+            RootOpen("", miOptionsDoNotUseGameToc.Checked);
         }
 
         private void miRootSave_Click(object sender, EventArgs e)
@@ -721,13 +721,13 @@ namespace GCRebuilder
 
         private void miHelpAbout_Click(object sender, EventArgs e)
         {
-            string msg = "Nintendo GameCube images rebuilder v1.1\r\n"
-                + "Created by BSV (bsv798@gmail.com)\r\n"
+            string msg = "Nintendo GameCube images rebuilder v1.3\r\n"
+                + "Created by BSV, forked and updated by Lunar Soap\r\n"
                 + "\r\n"
                 + "Supported command line parameters:\r\n"
-                + "    export file/folder from image: iso_path [node_path e file_or_folder]\r\n"
-                + "    import file into image: iso_path [node_path i file_or_folder]\r\n"
-                + "    rebuild image: root_path [iso_path]\r\n";
+                + "Export file/folder from image:\n    --extract iso_path folder_path\r\n"
+                + "Import file/folder from image:\n    --import iso_path folder_path\r\n"
+                + "Rebuild image:\n    --rebuild folder_path iso_path <--noGameTOC>\r\n";
 
             MessageBox.Show(msg, "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

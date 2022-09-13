@@ -150,7 +150,7 @@
             this.miRename,
             this.miCancel});
             this.cmsTVTOC.Name = "cmsTVTOC";
-            this.cmsTVTOC.Size = new System.Drawing.Size(165, 170);
+            this.cmsTVTOC.Size = new System.Drawing.Size(165, 148);
             this.cmsTVTOC.Opening += new System.ComponentModel.CancelEventHandler(this.cmsTVTOC_Opening);
             // 
             // miImport
@@ -699,7 +699,7 @@
             // 
             this.miImageOpen.Image = ((System.Drawing.Image)(resources.GetObject("miImageOpen.Image")));
             this.miImageOpen.Name = "miImageOpen";
-            this.miImageOpen.Size = new System.Drawing.Size(152, 22);
+            this.miImageOpen.Size = new System.Drawing.Size(147, 22);
             this.miImageOpen.Text = "Open…";
             this.miImageOpen.Click += new System.EventHandler(this.miImageOpen_Click);
             // 
@@ -708,34 +708,34 @@
             this.miImageClose.Enabled = false;
             this.miImageClose.Image = ((System.Drawing.Image)(resources.GetObject("miImageClose.Image")));
             this.miImageClose.Name = "miImageClose";
-            this.miImageClose.Size = new System.Drawing.Size(152, 22);
+            this.miImageClose.Size = new System.Drawing.Size(147, 22);
             this.miImageClose.Text = "Close";
             this.miImageClose.Click += new System.EventHandler(this.miImageClose_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(144, 6);
             // 
             // miImageWipeGarbage
             // 
             this.miImageWipeGarbage.Enabled = false;
             this.miImageWipeGarbage.Image = global::GCRebuilder.Properties.Resources.wipe;
             this.miImageWipeGarbage.Name = "miImageWipeGarbage";
-            this.miImageWipeGarbage.Size = new System.Drawing.Size(152, 22);
+            this.miImageWipeGarbage.Size = new System.Drawing.Size(147, 22);
             this.miImageWipeGarbage.Text = "Wipe garbage";
             this.miImageWipeGarbage.Click += new System.EventHandler(this.miImageWipeGarbage_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(144, 6);
             // 
             // miImageExit
             // 
             this.miImageExit.Image = global::GCRebuilder.Properties.Resources.exit;
             this.miImageExit.Name = "miImageExit";
-            this.miImageExit.Size = new System.Drawing.Size(152, 22);
+            this.miImageExit.Size = new System.Drawing.Size(147, 22);
             this.miImageExit.Text = "Exit";
             this.miImageExit.Click += new System.EventHandler(this.miImageExit_Click);
             // 
@@ -945,7 +945,7 @@
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
-            this.Text = "GCRebuilder v1.1";
+            this.Text = "GCRebuilder v1.3";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.cmsTVTOC.ResumeLayout(false);
