@@ -496,15 +496,16 @@ namespace GCRebuilder
             {
                 lblStartIdx.Text = "Start index:";
                 lblEndIdx.Text = "End index:";
+                tbStartIdx.Text = toc.fils[idx].pos.ToString();
+                tbEndIdx.Text = toc.fils[idx].len.ToString();
             }
             else
             {
                 lblStartIdx.Text = "File start:";
                 lblEndIdx.Text = "File length:";
+                tbStartIdx.Text = "0x" + toc.fils[idx].pos.ToString("X");
+                tbEndIdx.Text = "0x" + toc.fils[idx].len.ToString("X");
             }
-
-            tbStartIdx.Text = toc.fils[idx].pos.ToString();
-            tbEndIdx.Text = toc.fils[idx].len.ToString();
         }
 
         private void tvTOC_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
