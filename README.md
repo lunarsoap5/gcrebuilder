@@ -10,9 +10,9 @@ GCR can be built via any C# IDE or a CLI command like `msbuild GCRebuilder.sln`
 
 ## Usage
 
-Export file/folder from image: `--extract iso_path folder_path`
-Import file/folder from image: `--import iso_path folder_path`
-Rebuild image from folder: `--rebuild folder_path iso_path <--noGameTOC>`
+- Export file/folder from image: `--extract iso_path folder_path`
+- Import file/folder from image: `--import iso_path folder_path`
+- Rebuild image from folder: `--rebuild folder_path iso_path <--noGameTOC>`
 
 ## Recognition
 
