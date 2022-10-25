@@ -5,21 +5,18 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 
 using sio = System.IO;
 using ste = System.Text.Encoding;
 
-namespace GCRebuilder
+namespace GCRebuilder_Console
 {
-
-    public partial class MainForm : Form
+    public partial class BackendClass
     {
         private int expImpIdx;
         private string expImpPath;
 
         private delegate string ShowMTFolderDialogCB(string path);
-        private delegate bool ShowMTMBoxCB(string text, string caption, MessageBoxButtons btns, MessageBoxIcon icon, MessageBoxDefaultButton defBtn, DialogResult desRes);
 
         private bool ReadImageTOC()
         {
@@ -112,20 +109,6 @@ namespace GCRebuilder
                 namesTableEntryCount = mbr.ReadInt32BE() - 1;
                 namesTableStart = (namesTableEntryCount * 12) + 12;
 
-                if (retrieveFilesInfo)
-                {
-                    sspbProgress.Minimum = 0;
-                    sspbProgress.Maximum = 100;
-                    sspbProgress.Step = 1;
-                    sspbProgress.Value = 0;
-                    mod = (int)Math.Floor((float)(namesTableEntryCount + itemNum) / sspbProgress.Maximum);
-                    if (mod == 0)
-                    {
-                        sspbProgress.Maximum = namesTableEntryCount + itemNum;
-                        mod = 1;
-                    }
-                }
-
                 for (int cnt = 0; cnt < namesTableEntryCount; cnt++)
                 {
                     itemNamePtr = mbr.ReadInt32BE();
@@ -186,12 +169,7 @@ namespace GCRebuilder
                         if (error)
                             break;
 
-                        if (itemNum % mod == 0)
-                        {
-                            if (sspbProgress.Value < sspbProgress.Maximum)
-                                sspbProgress.Value += 1;
-                            //sslblAction.Text = string.Format("Check: '{0}'…", itemPath.Replace(resPath, ""));
-                        }
+                        
                     }
 
                     tif = new TOCItemFil(itemNum, dirEntry[dirEntryCount], itemPos, itemLen, itemIsDir, itemName, itemGamePath, itemPath);
@@ -214,12 +192,10 @@ namespace GCRebuilder
             brr.Close();
             fsr.Close();
 
-            if (retrieveFilesInfo)
-                sspbProgress.Value = 0;
+            
 
             if (error)
             {
-                MessageBox.Show(errorText, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 //sslblAction.Text = "Ready";
                 return false;
             }
@@ -227,7 +203,6 @@ namespace GCRebuilder
             CalcNextFileIds();
 
             ////sslblAction.Text = "Building Structure…";
-            error = GenerateTreeView(fileNameSort);
             ////sslblAction.Text = "Ready";
 
             rootOpened = false;
@@ -265,29 +240,12 @@ namespace GCRebuilder
 
             if (expPath.Length == 0)
             {
-                expPath = ShowMTFolderDialog(toc.fils[idx].name);
-                if (expPath != "-1")
-                    showMsg = true;
-                else
-                    expPath = "";
-                //fbd = new FolderBrowserDialog() { Description = "Export folder" };
-                //fbd.SelectedPath = toc.fils[idx].name;
-                //if (fbd.ShowDialog() == DialogResult.OK)
-                //{
-                //    expPath = fbd.SelectedPath;
-                //    showMsg = true;
-                //}
-            }
-
-            if (expPath.Length == 0)
-            {
                 error = true;
                 errorText = "";
             }
 
             if (!error)
             {
-                ResetProgressBar(0, toc.fils[idx].len - idx, 0);
 
                 expPath = (expPath[expPath.Length - 1] == '\\') ? expPath : expPath + '\\';
 
@@ -324,8 +282,6 @@ namespace GCRebuilder
                     else
                         Export(i, dirNames[dirIdx] + toc.fils[i].name);
 
-                    UpdateProgressBar(1);
-                    UpdateActionLabel(string.Format("Export: '{0}'", toc.fils[i].gamePath));
 
                     if (stopCurrProc)
                         break;
@@ -335,7 +291,6 @@ namespace GCRebuilder
             if (!showMsg)
                 errorText = null;
 
-            ResetControlsWipeing(error, errorText);
 
             isImpExping = false;
             stopCurrProc = false;
@@ -343,7 +298,6 @@ namespace GCRebuilder
 
         private void Export(int idx, string expPath)
         {
-            SaveFileDialog sfd;
             sio.FileStream fsr;
             sio.BinaryReader brr;
             sio.FileStream fsw;
@@ -355,16 +309,7 @@ namespace GCRebuilder
 
             escapePressed = false;
 
-            if (expPath.Length == 0)
-            {
-                sfd = new SaveFileDialog() { Filter = "All files (*.*)|*.*", Title = "Export file" };
-                sfd.FileName = toc.fils[idx].name;
-                if (sfd.ShowDialog() == DialogResult.OK)
-                {
-                    expPath = sfd.FileName;
-                    showMsg = true;
-                }
-            }
+            
 
             if (expPath.Length == 0)
                 return;
@@ -390,9 +335,7 @@ namespace GCRebuilder
                 b = brr.ReadBytes(curBR);
                 bww.Write(b);
 
-                if (escapePressed)
-                    if (ShowMTMBox("Cancel current process?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, DialogResult.Yes))
-                        stopCurrProc = true;
+                
 
                 if (stopCurrProc)
                     break;
@@ -403,8 +346,7 @@ namespace GCRebuilder
             brr.Close();
             fsr.Close();
 
-            if (showMsg)
-                MessageBox.Show("Done", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
 
         }
 
@@ -414,12 +356,11 @@ namespace GCRebuilder
 
         public void Import(string impPath)
         {
-            Import(Convert.ToInt32(selNode.Name), impPath);
+            Import(0, impPath);
         }
 
         private void Import(int idx, string impPath)
         {
-            OpenFileDialog ofd;
             sio.FileInfo fi;
             sio.FileStream fsr;
             sio.BinaryReader brr;
@@ -435,17 +376,6 @@ namespace GCRebuilder
             escapePressed = false;
 
             if (impPath.Length == 0)
-            {
-                ofd = new OpenFileDialog() { Filter = "All files (*.*)|*.*", Title = "Import file" };
-                ofd.FileName = toc.fils[idx].name;
-                if (ofd.ShowDialog() == DialogResult.OK)
-                {
-                    impPath = ofd.FileName;
-                    showMsg = true;
-                }
-            }
-
-            if (impPath.Length == 0)
                 return;
 
             fi = new sio.FileInfo(impPath);
@@ -457,7 +387,6 @@ namespace GCRebuilder
             endPos = toc.fils[idx].pos + maxLen;
             if (fi.Length > maxLen)
             {
-                MessageBox.Show("File to import is too large", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -484,7 +413,6 @@ namespace GCRebuilder
                 bww.Write(b);
 
                 if (escapePressed)
-                    if (ShowMTMBox("Cancel current process?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, DialogResult.Yes))
                         stopCurrProc = true;
 
                 if (stopCurrProc)
@@ -511,121 +439,9 @@ namespace GCRebuilder
             brr.Close();
             fsr.Close();
 
-            if (showMsg)
-                MessageBox.Show("Done", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void WipeGarbage()
-        {
-            sio.FileStream fsw = null;
-            sio.BinaryWriter bww = null;
-            int[] posLen = new int[0x8000];
-            int posLenCount = 0;
-            int len;
-            int idx;
-            int totalBytes = 0;
-            int currentBytes = 0;
-            int mod, modAct;
-            int maxBR = 0x8000, temBR;
-            int rem = 0;
-            byte[] bb = new byte[maxBR];
-            int j;
-            bool error = false;
-            string errorText = "";
-
-            escapePressed = false;
-
-            idx = 5; // was 2!!
-            for (int i = 5; i < toc.fils.Count; i++) // was 1!!
-            {
-                if (!toc.fils[i].isDir)
-                {
-                    posLen[posLenCount] = toc.fils[idx].pos + toc.fils[idx].len;
-                    posLenCount += 1;
-                    idx = toc.fils[i].nextIdx;
-                    posLen[posLenCount] = toc.fils[idx].pos - posLen[posLenCount - 1];
-                    totalBytes += posLen[posLenCount];
-                    posLenCount += 1;
-                }
-            }
-            posLenCount -= 2;
-            posLen[posLenCount] = toc.fils[idx].pos + toc.fils[idx].len;
-            posLenCount += 1;
-            totalBytes -= posLen[posLenCount];
-            posLen[posLenCount] = toc.totalLen - posLen[posLenCount - 1];
-            totalBytes += posLen[posLenCount];
-            posLenCount += 1;
-
-            ResetProgressBar(0, 100, 0);
-            mod = (int)Math.Floor((float)totalBytes / sspbProgress.Maximum);
-            mod = (mod | (maxBR - 1)) + 1;
-            j = (int)Math.Ceiling((float)totalBytes / mod);
-            if (j < 100)
-                ResetProgressBar(0, j, 0);
-            modAct = (int)Math.Floor((float)totalBytes / 1000);
-            modAct = (modAct | (maxBR - 1)) + 1;
-
-            try
-            {
-                fsw = new sio.FileStream(imgPath, sio.FileMode.Open, sio.FileAccess.Write, sio.FileShare.None);
-                bww = new sio.BinaryWriter(fsw, ste.Default);
-            }
-            catch (Exception ex)
-            {
-                error = true;
-                errorText = ex.Message;
-            }
-
-            UpdateActionLabel(string.Format("Wiping garbage: {0}/{1} bytes wiped", currentBytes, totalBytes));
-
-            if (!error)
-                for (int i = 0; i < posLenCount; i += 2)
-                {
-                    len = posLen[i + 1];
-                    if (len > 0)
-                    {
-                        fsw.Position = posLen[i];
-                        for (j = 0; j < len; j += maxBR)
-                        {
-                            if (j + maxBR < len)
-                            {
-                                temBR = maxBR - (currentBytes % maxBR);
-                                if (rem == 0)
-                                    rem = currentBytes % maxBR;
-                            }
-                            else
-                                temBR = len % maxBR;
-
-                            currentBytes += temBR;
-                            fsw.Write(bb, 0, temBR);
-
-                            if (currentBytes % modAct == 0)
-                                UpdateActionLabel(string.Format("Wiping garbage: {0}/{1} bytes wiped", currentBytes, totalBytes));
-
-                            if (currentBytes % mod == 0)
-                                UpdateProgressBar(1);
-
-                            if (escapePressed)
-                                if (ShowMTMBox("Cancel current process?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, DialogResult.Yes))
-                                    stopCurrProc = true;
-
-                            if (stopCurrProc)
-                                break;
-                        }
-                        if (rem > 0)
-                            fsw.Write(bb, 0, rem);
-                        rem = 0;
-                    }
-                }
-
-            if (bww != null) bww.Close();
-            if (fsw != null) fsw.Close();
-
-            ResetControlsWipeing(error, errorText);
-
-            isWipeing = false;
-            stopCurrProc = false;
-        }
+        
 
         //private void SaveTOC()
         //{
@@ -643,86 +459,8 @@ namespace GCRebuilder
         //    fs.Close();
         //}
 
-        private void ResetControlsWipeing(bool error, string errorText)
-        {
-            if (this.statusStrip.InvokeRequired)
-            {
-                ResetControlsCB d = new ResetControlsCB(ResetControlsWipeing);
-                this.Invoke(d, new object[] { error, errorText });
-            }
-            else
-            {
-                if (errorText != null)
-                    if (error)
-                        MessageBox.Show(this, errorText, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    else
-                        if (stopCurrProc)
-                            MessageBox.Show(this, "Process cancelled", "Message", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        else
-                            MessageBox.Show("Done", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        
 
-                miImage.Enabled = true;
-                miImageOpen.Enabled = true;
-                miImageClose.Enabled = true;
-                miImport.Visible = true;
-                miExport.Visible = true;
-                miCancel.Visible = false;
-                miImageWipeGarbage.Text = "Wipe garbage";
-                miImageWipeGarbage.Image = GCRebuilder.Properties.Resources.wipe;
-                if (bannerLoaded)
-                {
-                    cbBDFile.Enabled = true;
-                    btnBDSave.Enabled = true;
-                }
-                sslblAction.Text = "Ready";
-                if (bannerLoaded)
-                {
-                    cbBDFile.Enabled = true;
-                    btnBDSave.Enabled = true;
-                }
-                this.sspbProgress.Value = 0;
-            }
-        }
-
-        private string ShowMTFolderDialog(string path)
-        {
-            FolderBrowserDialog fbd;
-            string res = "-1";
-
-            if (this.statusStrip.InvokeRequired)
-            {
-                ShowMTFolderDialogCB d = new ShowMTFolderDialogCB(ShowMTFolderDialog);
-                res = (string)this.Invoke(d, new object[] { path });
-                return res;
-            }
-            else
-            {
-                fbd = new FolderBrowserDialog() { Description = "Export folder" };
-                fbd.SelectedPath = path;
-                if (fbd.ShowDialog() == DialogResult.OK)
-                    res = fbd.SelectedPath;
-            }
-
-            return res;
-        }
-
-        private bool ShowMTMBox(string text, string caption, MessageBoxButtons btns, MessageBoxIcon icon, MessageBoxDefaultButton defBtn, DialogResult desRes)
-        {
-            bool res = false;
-
-            if (this.statusStrip.InvokeRequired)
-            {
-                ShowMTMBoxCB d = new ShowMTMBoxCB(ShowMTMBox);
-                res = (bool)this.Invoke(d, new object[] { text, caption, btns, icon, defBtn, desRes });
-                return res;
-            }
-            else
-                if (MessageBox.Show(this, text, caption, btns, icon, defBtn) == desRes)
-                    res = true;
-
-            escapePressed = false;
-
-            return res;
-        }
+        
     }
 }

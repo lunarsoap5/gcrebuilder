@@ -5,15 +5,13 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 
 using sio = System.IO;
 using ste = System.Text.Encoding;
 
-namespace GCRebuilder
+namespace GCRebuilder_Console
 {
-
-    public partial class MainForm : Form
+    public partial class BackendClass
     {
         TOCClass toc;
 
@@ -40,11 +38,66 @@ namespace GCRebuilder
             {
                 fils = new List<TOCItemFil>();
                 fils.Add(new TOCItemFil(0, 0, 0, 99999, true, "root", "", resPath));
-                fils.Add(new TOCItemFil(1, 0, 0, 6, true, "&&SystemData", "&&systemdata\\", resPath + "&&systemdata\\"));
-                fils.Add(new TOCItemFil(2, 1, 0, 99999, false, "ISO.hdr", "&&SystemData\\iso.hdr", resPath + "&&SystemData\\iso.hdr"));
-                fils.Add(new TOCItemFil(3, 1, 9280, 99999, false, "AppLoader.ldr", "&&SystemData\\apploader.ldr", resPath + "&&SystemData\\apploader.ldr"));
-                fils.Add(new TOCItemFil(4, 1, 0, 99999, false, "Start.dol", "&&SystemData\\start.dol", resPath + "&&SystemData\\start.dol"));
-                fils.Add(new TOCItemFil(5, 1, 0, 99999, false, "Game.toc", "&&SystemData\\game.toc", resPath + "&&SystemData\\game.toc"));
+                fils.Add(
+                    new TOCItemFil(
+                        1,
+                        0,
+                        0,
+                        6,
+                        true,
+                        "&&SystemData",
+                        "&&systemdata\\",
+                        resPath + "&&systemdata\\"
+                    )
+                );
+                fils.Add(
+                    new TOCItemFil(
+                        2,
+                        1,
+                        0,
+                        99999,
+                        false,
+                        "ISO.hdr",
+                        "&&SystemData\\iso.hdr",
+                        resPath + "&&SystemData\\iso.hdr"
+                    )
+                );
+                fils.Add(
+                    new TOCItemFil(
+                        3,
+                        1,
+                        9280,
+                        99999,
+                        false,
+                        "AppLoader.ldr",
+                        "&&SystemData\\apploader.ldr",
+                        resPath + "&&SystemData\\apploader.ldr"
+                    )
+                );
+                fils.Add(
+                    new TOCItemFil(
+                        4,
+                        1,
+                        0,
+                        99999,
+                        false,
+                        "Start.dol",
+                        "&&SystemData\\start.dol",
+                        resPath + "&&SystemData\\start.dol"
+                    )
+                );
+                fils.Add(
+                    new TOCItemFil(
+                        5,
+                        1,
+                        0,
+                        99999,
+                        false,
+                        "Game.toc",
+                        "&&SystemData\\game.toc",
+                        resPath + "&&SystemData\\game.toc"
+                    )
+                );
 
                 totalLen = 0;
                 dataStart = totalLen;
@@ -96,13 +149,19 @@ namespace GCRebuilder
             public string name;
             public string path;
             public string gamePath;
-            public TreeNode node;
 
-            public TOCItemFil()
-            {
-            }
+            public TOCItemFil() { }
 
-            public TOCItemFil(int TOCIdx, int dirIdx, int pos, int len, bool isDir, string name, string gamePath, string path)
+            public TOCItemFil(
+                int TOCIdx,
+                int dirIdx,
+                int pos,
+                int len,
+                bool isDir,
+                string name,
+                string gamePath,
+                string path
+            )
             {
                 this.TOCIdx = TOCIdx;
                 this.dirIdx = dirIdx;
@@ -123,7 +182,16 @@ namespace GCRebuilder
 
             public object Clone()
             {
-                return new TOCItemFil(this.TOCIdx, this.dirIdx, this.pos, this.len, this.isDir, this.name, this.gamePath, this.path);
+                return new TOCItemFil(
+                    this.TOCIdx,
+                    this.dirIdx,
+                    this.pos,
+                    this.len,
+                    this.isDir,
+                    this.name,
+                    this.gamePath,
+                    this.path
+                );
             }
 
             #endregion
@@ -136,7 +204,8 @@ namespace GCRebuilder
             TOCItemFil tif;
             sio.FileStream fsr;
             sio.BinaryReader brr;
-            long prevPos, newPos;
+            long prevPos,
+                newPos;
             string tocName = "game.toc";
             sio.DirectoryInfo di;
             sio.FileInfo fi;
@@ -162,7 +231,8 @@ namespace GCRebuilder
             int mod = 1;
             bool error = false;
             string errorText = "";
-            int i, j;
+            int i,
+                j;
 
             toc = new TOCClass(resPath);
             itemNum = toc.fils.Count;
@@ -213,7 +283,11 @@ namespace GCRebuilder
 
             if (!error)
             {
-                fsr = new sio.FileStream(resPath + "&&systemdata\\" + tocName, sio.FileMode.Open, sio.FileAccess.Read);
+                fsr = new sio.FileStream(
+                    resPath + "&&systemdata\\" + tocName,
+                    sio.FileMode.Open,
+                    sio.FileAccess.Read
+                );
                 brr = new sio.BinaryReader(fsr, ste.Default);
 
                 i = brr.ReadInt32();
@@ -233,16 +307,13 @@ namespace GCRebuilder
                 namesTableEntryCount = brr.ReadInt32BE() - 1;
                 namesTableStart = (namesTableEntryCount * 12) + 12;
 
-                if (retrieveFilesInfo)
+                if (BackendClass.retrieveFilesInfo)
                 {
-                    sspbProgress.Minimum = 0;
-                    sspbProgress.Maximum = 100;
-                    sspbProgress.Step = 1;
-                    sspbProgress.Value = 0;
-                    mod = (int)Math.Floor((float)(namesTableEntryCount + itemNum) / sspbProgress.Maximum);
+
+                    mod = (int)
+                        Math.Floor((float)(namesTableEntryCount + itemNum));
                     if (mod == 0)
                     {
-                        sspbProgress.Maximum = namesTableEntryCount + itemNum;
                         mod = 1;
                     }
                 }
@@ -283,7 +354,7 @@ namespace GCRebuilder
                         if (j == 0)
                         {
                             itemGamePath = itemPath;
-                            itemPath = resPath + itemPath;
+                            itemPath = BackendClass.resPath + itemPath;
                             break;
                         }
                         else
@@ -295,7 +366,7 @@ namespace GCRebuilder
                     if (itemIsDir)
                         itemPath += '\\';
 
-                    if (retrieveFilesInfo)
+                    if (BackendClass.retrieveFilesInfo)
                     {
                         if (itemIsDir)
                         {
@@ -325,13 +396,20 @@ namespace GCRebuilder
 
                         if (itemNum % mod == 0)
                         {
-                            if (sspbProgress.Value < sspbProgress.Maximum)
-                                sspbProgress.Value += 1;
                             //sslblAction.Text = string.Format("Check: '{0}'…", itemPath.Replace(resPath, ""));
                         }
                     }
 
-                    tif = new TOCItemFil(itemNum, dirEntry[dirEntryCount], itemPos, itemLen, itemIsDir, itemName, itemGamePath, itemPath);
+                    tif = new TOCItemFil(
+                        itemNum,
+                        dirEntry[dirEntryCount],
+                        itemPos,
+                        itemLen,
+                        itemIsDir,
+                        itemName,
+                        itemGamePath,
+                        itemPath
+                    );
                     toc.fils.Add(tif);
                     toc.fils[0].len = toc.fils.Count;
 
@@ -342,30 +420,27 @@ namespace GCRebuilder
                     }
 
                     itemNum += 1;
-
                 }
                 brr.Close();
                 fsr.Close();
             }
 
-            if (retrieveFilesInfo)
-                sspbProgress.Value = 0;
+
 
             if (error)
             {
-                MessageBox.Show(errorText, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 //sslblAction.Text = "Ready";
-                return false; ;
+                return false;
+                ;
             }
 
             CalcNextFileIds();
 
             //sslblAction.Text = "Building Structure…";
-            error = GenerateTreeView(fileNameSort);
             //sslblAction.Text = "Ready";
 
-            rootOpened = true;
-            LoadInfo(!rootOpened);
+            BackendClass.rootOpened = true;
+            LoadInfo(!BackendClass.rootOpened);
 
             return error;
         }
@@ -408,8 +483,6 @@ namespace GCRebuilder
 
             toc.fils[2].pos = filePos;
 
-            GenerateTreeView(fileNameSort);
-
             rootOpened = true;
             LoadInfo(!rootOpened);
 
@@ -437,8 +510,16 @@ namespace GCRebuilder
 
             for (int cnt = 0; cnt < dirs.Length; cnt++)
             {
-                tif = new TOCItemFil(itemNum, tocDirIdx, tocDirIdx, 0, true,
-                    dirs[cnt].Name, dirs[cnt].FullName.Replace(resPath, ""), dirs[cnt].FullName);
+                tif = new TOCItemFil(
+                    itemNum,
+                    tocDirIdx,
+                    tocDirIdx,
+                    0,
+                    true,
+                    dirs[cnt].Name,
+                    dirs[cnt].FullName.Replace(resPath, ""),
+                    dirs[cnt].FullName
+                );
                 toc.fils.Add(tif);
                 itemNum += 1;
                 toc.dirCount += 1;
@@ -448,8 +529,16 @@ namespace GCRebuilder
             fils = pDir.GetFiles();
             for (int cnt = 0; cnt < fils.Length; cnt++)
             {
-                tif = new TOCItemFil(itemNum, tocDirIdx, filePos, (int)fils[cnt].Length, false,
-                    fils[cnt].Name, fils[cnt].FullName.Replace(resPath, ""), fils[cnt].FullName);
+                tif = new TOCItemFil(
+                    itemNum,
+                    tocDirIdx,
+                    filePos,
+                    (int)fils[cnt].Length,
+                    false,
+                    fils[cnt].Name,
+                    fils[cnt].FullName.Replace(resPath, ""),
+                    fils[cnt].FullName
+                );
                 toc.fils.Add(tif);
                 toc.fils[0].len = toc.fils.Count;
                 filePos += 2;
@@ -465,7 +554,8 @@ namespace GCRebuilder
             TOCClass tocCopy;
             int[] idxs;
             int idx;
-            int i, j;
+            int i,
+                j;
 
             toc.fils[2].pos = toc.fils.Count + 1; //needed for sorting
 
@@ -511,7 +601,10 @@ namespace GCRebuilder
                 {
                     toc.fils[idx].prevIdx = i;
                     for (j = i + 1; j < toc.fils.Count - 1; j++)
-                        if (!toc.fils[j].isDir) break; else i += 1;
+                        if (!toc.fils[j].isDir)
+                            break;
+                        else
+                            i += 1;
                     idx = toc.fils[i + 1].nextIdx;
                 }
 
@@ -543,104 +636,6 @@ namespace GCRebuilder
             //    }
         }
 
-        private bool GenerateTreeView(bool fileNameSort)
-        {
-            List<TreeNode> tns = new List<TreeNode>();
-            TreeNode tn, tnn;
-            int idx;
-            int j;
-
-            tvTOC.Nodes.Clear();
-            tvTOC.BeginUpdate();
-
-            tn = new TreeNode(toc.fils[0].name, 0, 0);
-            tn.Name = toc.fils[0].TOCIdx.ToString();
-            tn.ToolTipText = resPath;
-            toc.fils[0].node = tn;
-            tns.Add(tn);
-            tvTOC.Nodes.Add(tn);
-
-            if (fileNameSort)
-            {
-                for (int i = 1; i < toc.fils.Count; i++)
-                {
-                    if (toc.fils[i].isDir)
-                    {
-                        for (j = 0; j < tns.Count; j++)
-                            if (tns[j].Name == toc.fils[i].dirIdx.ToString())
-                                break;
-                        if (j == tns.Count)
-                        {
-                            tvTOC.Nodes.Clear();
-                            tvTOC.EndUpdate();
-                            MessageBox.Show("GenerateTreeView() error: dir2dir not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return false;
-                        }
-                        tn = tns[j];
-                        tnn = new TreeNode(toc.fils[i].name, 1, 2);
-                        tnn.Name = toc.fils[i].TOCIdx.ToString();
-                        tnn.ToolTipText = toc.fils[i].path;
-                        tnn.Tag = (object)i;
-                        toc.fils[i].node = tnn;
-                        tns.Add(tnn);
-                        tn.Nodes.Add(tnn);
-                    }
-                    else
-                    {
-                        for (j = 0; j < tns.Count; j++)
-                            if (tns[j].Name == toc.fils[i].dirIdx.ToString())
-                                break;
-                        if (j == tns.Count)
-                        {
-                            tvTOC.Nodes.Clear();
-                            tvTOC.EndUpdate();
-                            MessageBox.Show("GenerateTreeView() error: dir2fil not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return false;
-                        }
-                        tn = tns[j];
-                        tnn = new TreeNode(toc.fils[i].name, 3, 3);
-                        tnn.Name = toc.fils[i].TOCIdx.ToString();
-                        tnn.ToolTipText = toc.fils[i].path;
-                        tnn.Tag = (object)i;
-                        toc.fils[i].node = tnn;
-                        tn.Nodes.Add(tnn);
-                    }
-                }
-            }
-            else
-            {
-                idx = 2;
-                for (int i = 1; i < toc.fils.Count; i++)
-                {
-                    if (!toc.fils[i].isDir)
-                    {
-                        tnn = new TreeNode(toc.fils[idx].gamePath, 3, 3);
-                        tnn.Name = toc.fils[idx].TOCIdx.ToString();
-                        tnn.ToolTipText = toc.fils[idx].path;
-                        tnn.Tag = (object)idx;
-                        toc.fils[idx].node = tnn;
-                        tn.Nodes.Add(tnn);
-                        //if (toc.fils[idx].name == "opening.bnr")
-                        //    idx = idx;
-                        idx = toc.fils[i].nextIdx;
-                    }
-                }
-            }
-
-            tvTOC.Nodes[0].Expand();
-            tvTOC.SelectedNode = tvTOC.Nodes[0];
-            tvTOC.EndUpdate();
-            tvTOC.Enabled = true;
-            rbSortFileName.Enabled = true;
-            rbSortAddress.Enabled = true;
-            tbStartIdx.Enabled = true;
-            tbEndIdx.Enabled = true;
-
-            this.tvTOC.Focus();
-
-            return true;
-        }
-
         public void Rebuild(string path)
         {
             imgPath = path;
@@ -660,18 +655,23 @@ namespace GCRebuilder
             sio.FileInfo fi;
             int dataLen;
             bool dataStartPositioned = true;
-            byte[] tb, b;
+            byte[] tb,
+                b;
             string tocPath;
-            int mod, modAct;
+            int mod,
+                modAct;
             int bytesWritten;
-            int maxBR, curBR, temBR;
+            int maxBR,
+                curBR,
+                temBR;
             bool error = false;
             string errorText = "";
             int idx;
-            int i, j;
+            int i,
+                j;
 
             int m;
-            ModCB Mod = delegate(int val)
+            ModCB Mod = delegate (int val)
             {
                 m = val % filesMod;
                 if (m == 0)
@@ -682,10 +682,20 @@ namespace GCRebuilder
 
             try
             {
-                fsw = new sio.FileStream(imgPath, sio.FileMode.Create, sio.FileAccess.Write, sio.FileShare.None);
+                fsw = new sio.FileStream(
+                    imgPath,
+                    sio.FileMode.Create,
+                    sio.FileAccess.Write,
+                    sio.FileShare.None
+                );
                 bww = new sio.BinaryWriter(fsw, ste.Default);
 
-                fsr = new sio.FileStream(toc.fils[2].path, sio.FileMode.Open, sio.FileAccess.ReadWrite, sio.FileShare.None);
+                fsr = new sio.FileStream(
+                    toc.fils[2].path,
+                    sio.FileMode.Open,
+                    sio.FileAccess.ReadWrite,
+                    sio.FileShare.None
+                );
                 brr = new sio.BinaryReader(fsr, ste.Default);
                 ms = new sio.MemoryStream(brr.ReadBytes((int)fsr.Length), true);
                 br = new sio.BinaryReader(ms, ste.Default);
@@ -705,35 +715,30 @@ namespace GCRebuilder
                 toc.fils[5].path = sio.Path.GetTempPath() + "game.toc";
                 toc.fils[5].pos = i;
                 toc.dataStart = 0;
-                tb = ReGenTOC(toc.fils[5].pos, out toc.fils[5].len, ref toc.dataStart, out toc.totalLen);
+                tb = ReGenTOC(
+                    toc.fils[5].pos,
+                    out toc.fils[5].len,
+                    ref toc.dataStart,
+                    out toc.totalLen
+                );
                 if (appendImage)
                 {
                     dataLen = toc.totalLen - toc.dataStart;
                     toc.dataStart = maxImageSize - dataLen;
-                    tb = ReGenTOC(toc.fils[5].pos, out toc.fils[5].len, ref toc.dataStart, out toc.totalLen);
+                    tb = ReGenTOC(
+                        toc.fils[5].pos,
+                        out toc.fils[5].len,
+                        ref toc.dataStart,
+                        out toc.totalLen
+                    );
                 }
                 bw.WriteInt32BE(toc.fils[5].len); //toc len
                 bw.WriteInt32BE(toc.fils[5].len); //total toc len
                 ms.Position += 0x04;
                 bw.WriteInt32BE(toc.dataStart); //data start
                 ms.WriteTo(fsw);
-                if (miOptionsModifySystemFiles.Checked)
-                {
-                    fsr.Position = 0;
-                    ms.WriteTo(fsr);
-                    brr.Close();
-                    fsr.Close();
-                    fsr = new sio.FileStream(tocPath, sio.FileMode.Create, sio.FileAccess.Write, sio.FileShare.None);
-                    brw = new sio.BinaryWriter(fsr, ste.Default);
-                    brw.Write(tb);
-                    brw.Close();
-                    fsr.Close();
-                }
-                else
-                {
-                    brr.Close();
-                    fsr.Close();
-                }
+                brr.Close();
+                fsr.Close();
                 br.Close();
                 bw.Close();
                 ms.Close();
@@ -747,15 +752,6 @@ namespace GCRebuilder
                 maxBR = 0x8000;
                 curBR = maxBR - bytesWritten;
 
-                ResetProgressBar(0, 100, 0);
-                mod = (int)Math.Floor((float)toc.totalLen / sspbProgress.Maximum);
-                mod = (mod | (maxBR - 1)) + 1;
-                i = (int)Math.Ceiling((float)toc.totalLen / mod);
-                if (i < 100)
-                    ResetProgressBar(0, i, 0);
-                modAct = (int)Math.Floor((float)toc.totalLen / 1000);
-                modAct = (modAct | (maxBR - 1)) + 1;
-                UpdateActionLabel("Rebuilding…");
 
                 if (toc.totalLen > maxImageSize || toc.totalLen < 0)
                 {
@@ -780,7 +776,12 @@ namespace GCRebuilder
                                 error = true;
                                 break;
                             }
-                            fsr = new sio.FileStream(toc.fils[idx].path, sio.FileMode.Open, sio.FileAccess.Read, sio.FileShare.Read);
+                            fsr = new sio.FileStream(
+                                toc.fils[idx].path,
+                                sio.FileMode.Open,
+                                sio.FileAccess.Read,
+                                sio.FileShare.Read
+                            );
                             brr = new sio.BinaryReader(fsr, ste.Default);
 
                             if (!dataStartPositioned)
@@ -796,15 +797,12 @@ namespace GCRebuilder
                                     fsw.Write(b, 0, maxBR);
                                     bytesWritten += maxBR;
 
-                                    if (bytesWritten % modAct == 0)
-                                        UpdateActionLabel(string.Format("Rebuilding: {0}/{1} bytes written", bytesWritten, toc.totalLen));
 
-                                    if (bytesWritten % mod == 0)
-                                        UpdateProgressBar(1);
+
+
 
                                     if (escapePressed)
-                                        if (ShowMTMBox("Cancel current process?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, DialogResult.Yes))
-                                            stopCurrProc = true;
+                                        stopCurrProc = true;
 
                                     if (stopCurrProc)
                                         break;
@@ -813,7 +811,8 @@ namespace GCRebuilder
                                 {
                                     fsw.Write(b, 0, toc.dataStart % maxBR);
                                     curBR = maxBR;
-                                    bytesWritten = toc.dataStart + (maxBR - (toc.dataStart % maxBR)) - maxBR;
+                                    bytesWritten =
+                                        toc.dataStart + (maxBR - (toc.dataStart % maxBR)) - maxBR;
                                     fsw.Position = toc.dataStart;
                                     dataStartPositioned = true;
                                 }
@@ -847,23 +846,14 @@ namespace GCRebuilder
                                 {
                                     curBR = maxBR;
 
-                                    if (bytesWritten % modAct == 0)
-                                    {
-                                        UpdateActionLabel(string.Format("Rebuilding: {0}/{1} bytes written", bytesWritten, toc.totalLen));
-                                        if (stopCurrProc)
-                                            break;
-                                    }
 
-                                    if (bytesWritten % mod == 0)
-                                        UpdateProgressBar(1);
                                 }
                                 else
                                     curBR -= temBR;
                                 bww.Write(b);
 
                                 if (escapePressed)
-                                    if (ShowMTMBox("Cancel current process?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, DialogResult.Yes))
-                                        stopCurrProc = true;
+                                    stopCurrProc = true;
                             }
 
                             brr.Close();
@@ -900,26 +890,32 @@ namespace GCRebuilder
                 if (appendImage)
                     fsw.SetLength(maxImageSize); //1459978240
 
-            if (bww != null) bww.Close();
-            if (fsw != null) fsw.Close();
-            if (brr != null) brr.Close();
-            if (brw != null) brw.Close();
-            if (fsr != null) fsr.Close();
-            if (br != null) br.Close();
-            if (bw != null) bw.Close();
-            if (ms != null) ms.Close();
+            if (bww != null)
+                bww.Close();
+            if (fsw != null)
+                fsw.Close();
+            if (brr != null)
+                brr.Close();
+            if (brw != null)
+                brw.Close();
+            if (fsr != null)
+                fsr.Close();
+            if (br != null)
+                br.Close();
+            if (bw != null)
+                bw.Close();
+            if (ms != null)
+                ms.Close();
 
-            ResetControlsRebuild(error, errorText);
 
             isRebuilding = false;
             stopCurrProc = false;
-
         }
 
         private byte[] ReGenTOC(int tocStart, out int tocLen, ref int dataStart, out int totalLen)
         {
             int m;
-            ModCB Mod = delegate(int val)
+            ModCB Mod = delegate (int val)
             {
                 m = val % filesMod;
                 if (m == 0)
@@ -934,9 +930,11 @@ namespace GCRebuilder
             sio.FileStream fs;
             byte[] tb = new byte[0x40000];
             byte[] res;
-            long pos, newPos;
+            long pos,
+                newPos;
             int rawPos;
-            int itemNum, shift;
+            int itemNum,
+                shift;
             int idx;
             int[] poses = new int[0x8000];
 
@@ -1024,210 +1022,131 @@ namespace GCRebuilder
             totalLen = rawPos;
             res = new byte[tocLen];
             Array.Copy(tb, res, tocLen);
-            fs = new sio.FileStream(toc.fils[5].path, sio.FileMode.Create, sio.FileAccess.Write, sio.FileShare.None);
+            fs = new sio.FileStream(
+                toc.fils[5].path,
+                sio.FileMode.Create,
+                sio.FileAccess.Write,
+                sio.FileShare.None
+            );
             fs.Write(res, 0, tocLen);
             fs.Close();
             return res;
         }
+    }
+    #region SIOExtensions
 
-        private void ResetProgressBar(int min, int max, int val)
+    public static class SIOExtensions
+    {
+        private static int resI;
+        private static int resH;
+        private static string resS;
+        private static int i;
+        private static byte b;
+        private static byte[] bb;
+
+        public static int ReadInt32BE(this sio.BinaryReader br)
         {
-            if (this.statusStrip.InvokeRequired)
-            {
-                ResetProgressBarCB d = new ResetProgressBarCB(ResetProgressBar);
-                this.Invoke(d, new object[] { min, max, val });
-            }
-            else
-            {
-                this.sspbProgress.Minimum = min;
-                this.sspbProgress.Maximum = max;
-                this.sspbProgress.Value = val;
-            }
+            i = br.ReadByte();
+            resI = i << 0x18;
+            i = br.ReadByte();
+            resI += i << 0x10;
+            i = br.ReadByte();
+            resI += i << 0x08;
+            i = br.ReadByte();
+            resI += i;
+
+            return resI;
         }
 
-        private void UpdateProgressBar(int val)
+        public static void WriteInt32BE(this sio.BinaryWriter bw, int val)
         {
-            if (this.statusStrip.InvokeRequired)
-            {
-                UpdateProgressBarCB d = new UpdateProgressBarCB(UpdateProgressBar);
-                this.Invoke(d, new object[] { val });
-            }
-            else
-            {
-                if (val < this.sspbProgress.Maximum)
-                    if (val == 0)
-                        this.sspbProgress.Value = val;
-                    else
-                        this.sspbProgress.Value += val;
-            }
-        }
-
-        private void UpdateActionLabel(string text)
-        {
-            if (this.statusStrip.InvokeRequired)
-            {
-                UpdateActionLabelCB d = new UpdateActionLabelCB(UpdateActionLabel);
-                this.Invoke(d, new object[] { text });
-            }
-            else
-                this.sslblAction.Text = text;
-        }
-
-        private void ResetControlsRebuild(bool error, string errorText)
-        {
-            if (this.statusStrip.InvokeRequired)
-            {
-                ResetControlsCB d = new ResetControlsCB(ResetControlsRebuild);
-                this.Invoke(d, new object[] { error, errorText });
-            }
-            else
-            {
-                if (errorText != null)
-                    if (error)
-                        MessageBox.Show(this, errorText, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    else
-                        if (stopCurrProc)
-                            MessageBox.Show(this, "Process cancelled", "Message", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        else if (showLastDialog)
-                            MessageBox.Show("Done", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                //this.tvTOC.LabelEdit = true;
-                if (!fileNameSort && canEditTOC)
-                    gbStruct.Text = "Structure (editable)";
-                this.miRename.Enabled = true;
-                miRootOpen.Enabled = true;
-                miRootSave.Enabled = true;
-                miRootClose.Enabled = true;
-                miRootStart.Text = "Rebuild";
-                miRootStart.Image = GCRebuilder.Properties.Resources.root_run;
-                sslblAction.Text = "Ready";
-                miOptions.Enabled = true;
-                if (bannerLoaded)
-                {
-                    cbBDFile.Enabled = true;
-                    btnBDSave.Enabled = true;
-                }
-                this.sspbProgress.Value = 0;
-            }
-        }
-
-    }
-}
-
-#region SIOExtensions
-
-public static class SIOExtensions
-{
-    private static int resI;
-    private static int resH;
-    private static string resS;
-    private static int i;
-    private static byte b;
-    private static byte[] bb;
-
-    public static int ReadInt32BE(this sio.BinaryReader br)
-    {
-        i = br.ReadByte();
-        resI = i << 0x18;
-        i = br.ReadByte();
-        resI += i << 0x10;
-        i = br.ReadByte();
-        resI += i << 0x08;
-        i = br.ReadByte();
-        resI += i;
-
-        return resI;
-    }
-
-    public static void WriteInt32BE(this sio.BinaryWriter bw, int val)
-    {
-        b = (byte)((val >> 0x18) & 0xff);
-        bw.Write(b);
-        b = (byte)((val >> 0x10) & 0xff);
-        bw.Write(b);
-        b = (byte)((val >> 0x08) & 0xff);
-        bw.Write(b);
-        b = (byte)(val & 0xff);
-        bw.Write(b);
-    }
-
-    public static int ReadInt16BE(this sio.BinaryReader br)
-    {
-        i = br.ReadByte();
-        resH = i << 0x08;
-        i = br.ReadByte();
-        resH += i;
-
-        return resH;
-    }
-
-    public static void WriteInt16BE(this sio.BinaryWriter bw, int val)
-    {
-        b = (byte)((val >> 0x08) & 0xff);
-        bw.Write(b);
-        b = (byte)(val & 0xff);
-        bw.Write(b);
-    }
-
-    public static string ReadStringNT(this sio.BinaryReader br)
-    {
-        resS = "";
-        b = br.ReadByte();
-
-        while (b != 0)
-        {
-            resS += ste.Default.GetChars(new byte[] { b })[0];
-            b = br.ReadByte();
-        }
-
-        return resS;
-    }
-
-    public static void WriteStringNT(this sio.BinaryWriter bw, string s)
-    {
-        resI = s.Length;
-
-        for (i = 0; i < resI; i++)
-        {
-            b = ste.Default.GetBytes(new char[] { s[i] })[0];
+            b = (byte)((val >> 0x18) & 0xff);
+            bw.Write(b);
+            b = (byte)((val >> 0x10) & 0xff);
+            bw.Write(b);
+            b = (byte)((val >> 0x08) & 0xff);
+            bw.Write(b);
+            b = (byte)(val & 0xff);
             bw.Write(b);
         }
-        bw.Write((byte)0);
-    }
 
-    public static void WriteStringNT(this sio.BinaryWriter bw, Encoding enc, string s, int maxLen)
-    {
-        bb = enc.GetBytes(s.Replace("\r\n", "\n"));
-        resI = bb.Length;
-
-        for (i = 0; i < resI; i++)
+        public static int ReadInt16BE(this sio.BinaryReader br)
         {
-            bw.Write(bb[i]);
-            if (i == maxLen - 1)
+            i = br.ReadByte();
+            resH = i << 0x08;
+            i = br.ReadByte();
+            resH += i;
+
+            return resH;
+        }
+
+        public static void WriteInt16BE(this sio.BinaryWriter bw, int val)
+        {
+            b = (byte)((val >> 0x08) & 0xff);
+            bw.Write(b);
+            b = (byte)(val & 0xff);
+            bw.Write(b);
+        }
+
+        public static string ReadStringNT(this sio.BinaryReader br)
+        {
+            resS = "";
+            b = br.ReadByte();
+
+            while (b != 0)
             {
-                resI = i;
-                break;
+                resS += ste.Default.GetChars(new byte[] { b })[0];
+                b = br.ReadByte();
             }
+
+            return resS;
         }
 
-        for (i = resI; i < maxLen; i++)
-            bw.Write((byte)0);
-    }
-
-    public static string ToStringC(char[] chars)
-    {
-        resS = "";
-        resH = chars.Length;
-
-        for (int resI = 0; resI < resH; resI++)
+        public static void WriteStringNT(this sio.BinaryWriter bw, string s)
         {
-            if (chars[resI] == '\n')
-                resS += '\r';
-            resS += chars[resI];
+            resI = s.Length;
+
+            for (i = 0; i < resI; i++)
+            {
+                b = ste.Default.GetBytes(new char[] { s[i] })[0];
+                bw.Write(b);
+            }
+            bw.Write((byte)0);
         }
 
-        return resS;
+        public static void WriteStringNT(this sio.BinaryWriter bw, Encoding enc, string s, int maxLen)
+        {
+            bb = enc.GetBytes(s.Replace("\r\n", "\n"));
+            resI = bb.Length;
+
+            for (i = 0; i < resI; i++)
+            {
+                bw.Write(bb[i]);
+                if (i == maxLen - 1)
+                {
+                    resI = i;
+                    break;
+                }
+            }
+
+            for (i = resI; i < maxLen; i++)
+                bw.Write((byte)0);
+        }
+
+        public static string ToStringC(char[] chars)
+        {
+            resS = "";
+            resH = chars.Length;
+
+            for (int resI = 0; resI < resH; resI++)
+            {
+                if (chars[resI] == '\n')
+                    resS += '\r';
+                resS += chars[resI];
+            }
+
+            return resS;
+        }
     }
 }
-
 #endregion

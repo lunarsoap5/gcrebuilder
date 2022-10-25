@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-namespace GCRebuilder
+namespace GCRebuilder_Console
 {
     static class Program
     {
@@ -14,17 +13,17 @@ namespace GCRebuilder
         [STAThread]
         static int Main(string[] args)
         {
+            
             if (args.Length > 1)
             {
                 try
                 {
-                    MainForm mf = new GCRebuilder.MainForm(args);
+                    BackendClass mf = new GCRebuilder_Console.BackendClass(args);
 
-                    if (mf.IsImagePath(args[1]))
+                    if (BackendClass.IsImagePath(args[1]))
                     {
                         if (args.Length == 3)
                         {
-
                             if (args[0].Equals("--extract"))
                             {
                                 mf.ImageOpen(args[1]);
@@ -69,7 +68,6 @@ namespace GCRebuilder
                     {
                         Usage();
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -81,15 +79,6 @@ namespace GCRebuilder
             else if ((args.Length == 1) && (args[0].Equals("help")))
             {
                 Usage();
-            }
-            else
-            {
-                ShowWindow(GetConsoleWindow(), 0);
-
-                Application.EnableVisualStyles();
-                Application.SetHighDpiMode(HighDpiMode.SystemAware);
-                Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new MainForm(args));
             }
 
             return 0;
