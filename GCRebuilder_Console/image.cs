@@ -65,6 +65,20 @@ namespace GCRebuilder_Console
             );
             brr = new sio.BinaryReader(fsr, ste.Default);
 
+            bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                OSPlatform.Windows
+            );
+
+            char folderPaths;
+            if (isWindows) //Project will not build on UNIX without this check.
+            {
+                folderPaths = '\\';
+            }
+            else
+            {
+                folderPaths = '/';
+            }
+
             if (fsr.Length > 0x0438)
             {
                 fsr.Position = 0x0400;
@@ -158,12 +172,12 @@ namespace GCRebuilder_Console
                         }
                         else
                         {
-                            itemPath = itemPath.Insert(0, toc.fils[j].name + '\\');
+                            itemPath = itemPath.Insert(0, toc.fils[j].name + folderPaths);
                             j = toc.fils[j].dirIdx;
                         }
                     }
                     if (itemIsDir)
-                        itemPath += '\\';
+                        itemPath += folderPaths;
 
                     if (retrieveFilesInfo)
                     {
@@ -255,7 +269,7 @@ namespace GCRebuilder_Console
             );
 
             char folderPaths;
-            if (isWindows)
+            if (isWindows) // Project will not build on UNIX without this check
             {
                 folderPaths = '\\';
             }
@@ -274,6 +288,9 @@ namespace GCRebuilder_Console
             {
                 expPath =
                     (expPath[expPath.Length - 1] == folderPaths) ? expPath : expPath + folderPaths;
+                
+                Console.WriteLine(expPath);
+                Console.WriteLine(folderPaths);
 
                 if (idx == 0)
                 {

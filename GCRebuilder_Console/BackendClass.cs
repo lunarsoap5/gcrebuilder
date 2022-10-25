@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 using sio = System.IO;
 using ste = System.Text.Encoding;
@@ -134,6 +135,19 @@ namespace GCRebuilder_Console
         {
             string PrevPath = resPath;
             bool success = false;
+            bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                OSPlatform.Windows
+            );
+
+            char folderPaths;
+            if (isWindows) // Project cannot find files without this check.
+            {
+                folderPaths = '\\';
+            }
+            else
+            {
+                folderPaths = '/';
+            }
 
 
             if (path.Length == 0)
@@ -141,8 +155,8 @@ namespace GCRebuilder_Console
 
             resPath = path;
 
-            if (resPath.LastIndexOf('\\') != resPath.Length - 1)
-                resPath += '\\';
+            if (resPath.LastIndexOf(folderPaths) != resPath.Length - 1)
+                resPath += folderPaths;
 
             success = CheckResPath(useTOC);
             if (success)

@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Runtime.InteropServices;
 
 using sio = System.IO;
 using ste = System.Text.Encoding;
@@ -36,6 +37,19 @@ namespace GCRebuilder_Console
 
             public TOCClass(string resPath)
             {
+                bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                OSPlatform.Windows
+            );
+
+            char folderPaths;
+            if (isWindows) // Project will not build on UNIX without this
+            {
+                folderPaths = '\\';
+            }
+            else
+            {
+                folderPaths = '/';
+            }
                 fils = new List<TOCItemFil>();
                 fils.Add(new TOCItemFil(0, 0, 0, 99999, true, "root", "", resPath));
                 fils.Add(
@@ -46,8 +60,8 @@ namespace GCRebuilder_Console
                         6,
                         true,
                         "&&SystemData",
-                        "&&systemdata\\",
-                        resPath + "&&systemdata\\"
+                        "&&systemdata" + folderPaths,
+                        resPath + "&&systemdata" + folderPaths
                     )
                 );
                 fils.Add(
@@ -58,8 +72,8 @@ namespace GCRebuilder_Console
                         99999,
                         false,
                         "ISO.hdr",
-                        "&&SystemData\\iso.hdr",
-                        resPath + "&&SystemData\\iso.hdr"
+                        "&&SystemData" + folderPaths + "iso.hdr",
+                        resPath + "&&SystemData" + folderPaths + "iso.hdr"
                     )
                 );
                 fils.Add(
@@ -70,8 +84,8 @@ namespace GCRebuilder_Console
                         99999,
                         false,
                         "AppLoader.ldr",
-                        "&&SystemData\\apploader.ldr",
-                        resPath + "&&SystemData\\apploader.ldr"
+                        "&&SystemData" + folderPaths + "apploader.ldr",
+                        resPath + "&&SystemData" + folderPaths + "apploader.ldr"
                     )
                 );
                 fils.Add(
@@ -82,8 +96,8 @@ namespace GCRebuilder_Console
                         99999,
                         false,
                         "Start.dol",
-                        "&&SystemData\\start.dol",
-                        resPath + "&&SystemData\\start.dol"
+                        "&&SystemData" + folderPaths + "start.dol",
+                        resPath + "&&SystemData" + folderPaths + "start.dol"
                     )
                 );
                 fils.Add(
@@ -94,8 +108,8 @@ namespace GCRebuilder_Console
                         99999,
                         false,
                         "Game.toc",
-                        "&&SystemData\\game.toc",
-                        resPath + "&&SystemData\\game.toc"
+                        "&&SystemData" + folderPaths + "game.toc",
+                        resPath + "&&SystemData" + folderPaths + "game.toc"
                     )
                 );
 
@@ -238,6 +252,12 @@ namespace GCRebuilder_Console
             itemNum = toc.fils.Count;
             shift = toc.fils.Count - 1;
 
+            bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                OSPlatform.Windows
+            );
+
+            char folderPaths = '\\';
+
             for (i = 2; i < 6; i++)
             {
                 fi = new sio.FileInfo(toc.fils[i].path);
@@ -284,7 +304,7 @@ namespace GCRebuilder_Console
             if (!error)
             {
                 fsr = new sio.FileStream(
-                    resPath + "&&systemdata\\" + tocName,
+                    resPath + "&&systemdata" + folderPaths + tocName,
                     sio.FileMode.Open,
                     sio.FileAccess.Read
                 );
@@ -359,12 +379,12 @@ namespace GCRebuilder_Console
                         }
                         else
                         {
-                            itemPath = itemPath.Insert(0, toc.fils[j].name + '\\');
+                            itemPath = itemPath.Insert(0, toc.fils[j].name + folderPaths);
                             j = toc.fils[j].dirIdx;
                         }
                     }
                     if (itemIsDir)
-                        itemPath += '\\';
+                        itemPath += folderPaths;
 
                     if (BackendClass.retrieveFilesInfo)
                     {
@@ -885,6 +905,7 @@ namespace GCRebuilder_Console
             {
                 error = true;
                 errorText = ex.Message;
+                Console.WriteLine(errorText);
             }
             if (!error && !stopCurrProc)
                 if (appendImage)
