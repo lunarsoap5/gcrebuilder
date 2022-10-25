@@ -38,18 +38,18 @@ namespace GCRebuilder_Console
             public TOCClass(string resPath)
             {
                 bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-                OSPlatform.Windows
-            );
+                    OSPlatform.Windows
+                );
 
-            char folderPaths;
-            if (isWindows) // Project will not build on UNIX without this
-            {
-                folderPaths = '\\';
-            }
-            else
-            {
-                folderPaths = '/';
-            }
+                char folderPaths;
+                if (isWindows) // Project will not build on UNIX without this
+                {
+                    folderPaths = '\\';
+                }
+                else
+                {
+                    folderPaths = '/';
+                }
                 fils = new List<TOCItemFil>();
                 fils.Add(new TOCItemFil(0, 0, 0, 99999, true, "root", "", resPath));
                 fils.Add(
@@ -73,7 +73,7 @@ namespace GCRebuilder_Console
                         false,
                         "ISO.hdr",
                         "&&SystemData" + folderPaths + "iso.hdr",
-                        resPath + "&&SystemData" + folderPaths + "iso.hdr"
+                        resPath + "&&systemdata" + folderPaths + "ISO.hdr"
                     )
                 );
                 fils.Add(
@@ -85,7 +85,7 @@ namespace GCRebuilder_Console
                         false,
                         "AppLoader.ldr",
                         "&&SystemData" + folderPaths + "apploader.ldr",
-                        resPath + "&&SystemData" + folderPaths + "apploader.ldr"
+                        resPath + "&&systemdata" + folderPaths + "AppLoader.ldr"
                     )
                 );
                 fils.Add(
@@ -97,7 +97,7 @@ namespace GCRebuilder_Console
                         false,
                         "Start.dol",
                         "&&SystemData" + folderPaths + "start.dol",
-                        resPath + "&&SystemData" + folderPaths + "start.dol"
+                        resPath + "&&systemdata" + folderPaths + "Start.dol"
                     )
                 );
                 fils.Add(
@@ -109,7 +109,7 @@ namespace GCRebuilder_Console
                         false,
                         "Game.toc",
                         "&&SystemData" + folderPaths + "game.toc",
-                        resPath + "&&SystemData" + folderPaths + "game.toc"
+                        resPath + "&&systemdata" + folderPaths + "Game.toc"
                     )
                 );
 
@@ -220,7 +220,7 @@ namespace GCRebuilder_Console
             sio.BinaryReader brr;
             long prevPos,
                 newPos;
-            string tocName = "game.toc";
+            string tocName = "Game.toc";
             sio.DirectoryInfo di;
             sio.FileInfo fi;
 
@@ -256,14 +256,14 @@ namespace GCRebuilder_Console
                 OSPlatform.Windows
             );
 
-            char folderPaths = '\\';
+            char folderPaths = '/';
 
             for (i = 2; i < 6; i++)
             {
                 fi = new sio.FileInfo(toc.fils[i].path);
                 if (!fi.Exists)
                 {
-                    errorText = string.Format("File '{0}' not found", toc.fils[i].path);
+                    Console.WriteLine(string.Format("File '{0}' not found", toc.fils[i].path));
                     error = true;
                 }
                 else
@@ -282,7 +282,7 @@ namespace GCRebuilder_Console
                 fsr.Position = 0x1c;
                 if (brr.ReadInt32() != 0x3d9f33c2)
                 {
-                    errorText = "Not a GameCube image";
+                    Console.WriteLine("Not a GameCube image");
                     error = true;
                 }
 
@@ -314,14 +314,18 @@ namespace GCRebuilder_Console
                 if (i != 1)
                 {
                     error = true;
-                    errorText = "Multiple FST image?\r\nPlease mail me info about this image";
+                    Console.WriteLine(
+                        "Multiple FST image?\r\nPlease mail me info about this image"
+                    );
                 }
 
                 i = brr.ReadInt32();
                 if (i != 0)
                 {
                     error = true;
-                    errorText = "Multiple FST image?\r\nPlease mail me info about this image";
+                    Console.WriteLine(
+                        "Multiple FST image?\r\nPlease mail me info about this image"
+                    );
                 }
 
                 namesTableEntryCount = brr.ReadInt32BE() - 1;
@@ -329,9 +333,7 @@ namespace GCRebuilder_Console
 
                 if (BackendClass.retrieveFilesInfo)
                 {
-
-                    mod = (int)
-                        Math.Floor((float)(namesTableEntryCount + itemNum));
+                    mod = (int)Math.Floor((float)(namesTableEntryCount + itemNum));
                     if (mod == 0)
                     {
                         mod = 1;
@@ -445,8 +447,6 @@ namespace GCRebuilder_Console
                 fsr.Close();
             }
 
-
-
             if (error)
             {
                 //sslblAction.Text = "Ready";
@@ -518,6 +518,15 @@ namespace GCRebuilder_Console
             int tocDirIdx = itemNum - 1;
 
             dirs = pDir.GetDirectories();
+
+            Array.Sort(
+                dirs,
+                delegate(sio.DirectoryInfo x, sio.DirectoryInfo y)
+                {
+                    return x.Name.CompareTo(y.Name);
+                }
+            );
+
             //IEnumerable<sio.DirectoryInfo> query = dirs.Where(dir => dir.Name.ToLower() == "&&systemdata");
             for (int cnt = 0; cnt < dirs.Length; cnt++)
                 if (dirs[cnt].Name.ToLower() == "&&systemdata")
@@ -547,6 +556,13 @@ namespace GCRebuilder_Console
             }
 
             fils = pDir.GetFiles();
+            Array.Sort(
+                fils,
+                delegate(sio.FileInfo x, sio.FileInfo y)
+                {
+                    return x.Name.CompareTo(y.Name);
+                }
+            );
             for (int cnt = 0; cnt < fils.Length; cnt++)
             {
                 tif = new TOCItemFil(
@@ -691,7 +707,7 @@ namespace GCRebuilder_Console
                 j;
 
             int m;
-            ModCB Mod = delegate (int val)
+            ModCB Mod = delegate(int val)
             {
                 m = val % filesMod;
                 if (m == 0)
@@ -772,7 +788,6 @@ namespace GCRebuilder_Console
                 maxBR = 0x8000;
                 curBR = maxBR - bytesWritten;
 
-
                 if (toc.totalLen > maxImageSize || toc.totalLen < 0)
                 {
                     errorText = "The resulting image is too large";
@@ -787,6 +802,7 @@ namespace GCRebuilder_Console
                         if (!addressRebuild)
                             idx = i;
 
+                        //Console.WriteLine(toc.fils[i].path);
                         if (!toc.fils[i].isDir)
                         {
                             fi = new sio.FileInfo(toc.fils[idx].path);
@@ -816,10 +832,6 @@ namespace GCRebuilder_Console
                                 {
                                     fsw.Write(b, 0, maxBR);
                                     bytesWritten += maxBR;
-
-
-
-
 
                                     if (escapePressed)
                                         stopCurrProc = true;
@@ -865,8 +877,6 @@ namespace GCRebuilder_Console
                                 if (temBR == curBR)
                                 {
                                     curBR = maxBR;
-
-
                                 }
                                 else
                                     curBR -= temBR;
@@ -928,7 +938,6 @@ namespace GCRebuilder_Console
             if (ms != null)
                 ms.Close();
 
-
             isRebuilding = false;
             stopCurrProc = false;
         }
@@ -936,7 +945,7 @@ namespace GCRebuilder_Console
         private byte[] ReGenTOC(int tocStart, out int tocLen, ref int dataStart, out int totalLen)
         {
             int m;
-            ModCB Mod = delegate (int val)
+            ModCB Mod = delegate(int val)
             {
                 m = val % filesMod;
                 if (m == 0)
@@ -1054,6 +1063,7 @@ namespace GCRebuilder_Console
             return res;
         }
     }
+
     #region SIOExtensions
 
     public static class SIOExtensions
@@ -1135,7 +1145,12 @@ namespace GCRebuilder_Console
             bw.Write((byte)0);
         }
 
-        public static void WriteStringNT(this sio.BinaryWriter bw, Encoding enc, string s, int maxLen)
+        public static void WriteStringNT(
+            this sio.BinaryWriter bw,
+            Encoding enc,
+            string s,
+            int maxLen
+        )
         {
             bb = enc.GetBytes(s.Replace("\r\n", "\n"));
             resI = bb.Length;

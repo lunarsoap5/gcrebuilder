@@ -67,7 +67,6 @@ namespace GCRebuilder_Console
 
         public void ImageOpen(string path)
         {
-
             if (path.Length == 0)
                 return;
 
@@ -119,7 +118,6 @@ namespace GCRebuilder_Console
             return !error;
         }
 
-        
         public bool IsRootPath(string arg)
         {
             sio.DirectoryInfo di;
@@ -149,7 +147,6 @@ namespace GCRebuilder_Console
                 folderPaths = '/';
             }
 
-
             if (path.Length == 0)
                 return;
 
@@ -162,8 +159,7 @@ namespace GCRebuilder_Console
             if (success)
                 if (useTOC)
                     success = GenerateTOC();
-                else
-                    if (success)
+                else if (success)
                     success = ReadTOC();
 
             if (success)
@@ -176,13 +172,20 @@ namespace GCRebuilder_Console
                 resPath = PrevPath;
         }
 
-        private bool CheckResPath( bool useTOC)
+        private bool CheckResPath(bool useTOC)
         {
             sio.DirectoryInfo di;
             sio.FileInfo[] fis;
             string sysDir = "&&systemdata";
-            string[] sysFiles = new string[] { "apploader.ldr", "game.toc", "iso.hdr", "start.dol" };
-            int i, j;
+            string[] sysFiles = new string[]
+            {
+                "apploader.ldr",
+                "game.toc",
+                "iso.hdr",
+                "start.dol"
+            };
+            int i,
+                j;
 
             try
             {
@@ -201,7 +204,13 @@ namespace GCRebuilder_Console
                             break;
                     if (j == fis.Length)
                     {
-                        Console.WriteLine(string.Format("File '{0}' not found in '{1}' folder", sysFiles[i], sysDir));
+                        Console.WriteLine(
+                            string.Format(
+                                "File '{0}' not found in '{1}' folder",
+                                sysFiles[i],
+                                sysDir
+                            )
+                        );
                         return false;
                     }
                 }
@@ -210,12 +219,16 @@ namespace GCRebuilder_Console
                 {
                     if (fis.Length > 4)
                     {
-                        Console.WriteLine(string.Format("Misc files are not allowed in '{0}' folder", sysDir));
+                        Console.WriteLine(
+                            string.Format("Misc files are not allowed in '{0}' folder", sysDir)
+                        );
                         return false;
                     }
                     if (di.GetDirectories().Length > 0)
                     {
-                        Console.WriteLine(string.Format("Subfolders are not allowed in '{0}' folder", sysDir));
+                        Console.WriteLine(
+                            string.Format("Subfolders are not allowed in '{0}' folder", sysDir)
+                        );
                         return false;
                     }
                 }

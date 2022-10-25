@@ -13,7 +13,6 @@ namespace GCRebuilder_Console
         [STAThread]
         static int Main(string[] args)
         {
-            
             if (args.Length > 1)
             {
                 try
@@ -48,7 +47,7 @@ namespace GCRebuilder_Console
                         {
                             if (args[0].Equals("--rebuild"))
                             {
-                                if (args[3].Equals("--noGameTOC"))
+                                if ((args.Length > 3) && args[3].Equals("--noGameTOC"))
                                 {
                                     mf.RootOpen(args[1], true);
                                 }
