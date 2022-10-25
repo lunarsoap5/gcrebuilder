@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Runtime.InteropServices;
 
 using sio = System.IO;
 using ste = System.Text.Encoding;
@@ -25,7 +26,8 @@ namespace GCRebuilder_Console
             sio.BinaryReader brr;
             sio.MemoryStream msr;
             sio.BinaryReader mbr;
-            long prevPos, newPos;
+            long prevPos,
+                newPos;
 
             int namesTableEntryCount;
             int namesTableStart;
@@ -48,13 +50,19 @@ namespace GCRebuilder_Console
             int mod = 1;
             bool error = false;
             string errorText = "";
-            int i, j;
+            int i,
+                j;
 
             toc = new TOCClass(resPath);
             itemNum = toc.fils.Count;
             shift = toc.fils.Count - 1;
 
-            fsr = new sio.FileStream(imgPath, sio.FileMode.Open, sio.FileAccess.Read, sio.FileShare.Read);
+            fsr = new sio.FileStream(
+                imgPath,
+                sio.FileMode.Open,
+                sio.FileAccess.Read,
+                sio.FileShare.Read
+            );
             brr = new sio.BinaryReader(fsr, ste.Default);
 
             if (fsr.Length > 0x0438)
@@ -168,11 +176,18 @@ namespace GCRebuilder_Console
 
                         if (error)
                             break;
-
-                        
                     }
 
-                    tif = new TOCItemFil(itemNum, dirEntry[dirEntryCount], itemPos, itemLen, itemIsDir, itemName, itemGamePath, itemPath);
+                    tif = new TOCItemFil(
+                        itemNum,
+                        dirEntry[dirEntryCount],
+                        itemPos,
+                        itemLen,
+                        itemIsDir,
+                        itemName,
+                        itemGamePath,
+                        itemPath
+                    );
                     toc.fils.Add(tif);
                     toc.fils[0].len = toc.fils.Count;
 
@@ -183,7 +198,6 @@ namespace GCRebuilder_Console
                     }
 
                     itemNum += 1;
-
                 }
                 mbr.Close();
                 msr.Close();
@@ -191,8 +205,6 @@ namespace GCRebuilder_Console
 
             brr.Close();
             fsr.Close();
-
-            
 
             if (error)
             {
@@ -238,6 +250,20 @@ namespace GCRebuilder_Console
             string errorText = "";
             int i;
 
+            bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                OSPlatform.Windows
+            );
+
+            char folderPaths;
+            if (isWindows)
+            {
+                folderPaths = '\\';
+            }
+            else
+            {
+                folderPaths = '/';
+            }
+
             if (expPath.Length == 0)
             {
                 error = true;
@@ -246,8 +272,8 @@ namespace GCRebuilder_Console
 
             if (!error)
             {
-
-                expPath = (expPath[expPath.Length - 1] == '\\') ? expPath : expPath + '\\';
+                expPath =
+                    (expPath[expPath.Length - 1] == folderPaths) ? expPath : expPath + folderPaths;
 
                 if (idx == 0)
                 {
@@ -256,11 +282,14 @@ namespace GCRebuilder_Console
                 }
                 else
                 {
-                    i = toc.fils[idx].gamePath.LastIndexOf('\\', toc.fils[idx].gamePath.Length - 2);
+                    i = toc.fils[idx].gamePath.LastIndexOf(
+                        folderPaths,
+                        toc.fils[idx].gamePath.Length - 2
+                    );
                     if (i < 0)
                         excPath = "root:";
                     else
-                        excPath = "root:\\" + toc.fils[idx].gamePath.Substring(0, i);
+                        excPath = "root:" + folderPaths + toc.fils[idx].gamePath.Substring(0, i);
                 }
 
                 dirLens[dirIdx] = -1;
@@ -272,16 +301,26 @@ namespace GCRebuilder_Console
 
                     if (toc.fils[i].isDir)
                     {
-                        di = new sio.DirectoryInfo(expPath + (("root:\\" + toc.fils[i].gamePath).Replace(excPath, "")));
+                        di = new sio.DirectoryInfo(
+                            expPath
+                                + (
+                                    ("root:" + folderPaths + toc.fils[i].gamePath).Replace(
+                                        excPath,
+                                        ""
+                                    )
+                                )
+                        );
                         if (!di.Exists)
                             di.Create();
                         dirIdx += 1;
                         dirLens[dirIdx] = toc.fils[i].len;
-                        dirNames[dirIdx] = (di.FullName[di.FullName.Length - 1] == '\\') ? di.FullName : di.FullName + '\\';
+                        dirNames[dirIdx] =
+                            (di.FullName[di.FullName.Length - 1] == folderPaths)
+                                ? di.FullName
+                                : di.FullName + folderPaths;
                     }
                     else
                         Export(i, dirNames[dirIdx] + toc.fils[i].name);
-
 
                     if (stopCurrProc)
                         break;
@@ -290,7 +329,6 @@ namespace GCRebuilder_Console
 
             if (!showMsg)
                 errorText = null;
-
 
             isImpExping = false;
             stopCurrProc = false;
@@ -303,20 +341,30 @@ namespace GCRebuilder_Console
             sio.FileStream fsw;
             sio.BinaryWriter bww;
             long endPos;
-            int maxBR, curBR, temBR;
+            int maxBR,
+                curBR,
+                temBR;
             bool showMsg = false;
             byte[] b;
 
             escapePressed = false;
 
-            
-
             if (expPath.Length == 0)
                 return;
 
-            fsr = new sio.FileStream(imgPath, sio.FileMode.Open, sio.FileAccess.Read, sio.FileShare.Read);
+            fsr = new sio.FileStream(
+                imgPath,
+                sio.FileMode.Open,
+                sio.FileAccess.Read,
+                sio.FileShare.Read
+            );
             brr = new sio.BinaryReader(fsr, ste.Default);
-            fsw = new sio.FileStream(expPath, sio.FileMode.Create, sio.FileAccess.Write, sio.FileShare.None);
+            fsw = new sio.FileStream(
+                expPath,
+                sio.FileMode.Create,
+                sio.FileAccess.Write,
+                sio.FileShare.None
+            );
             bww = new sio.BinaryWriter(fsw, ste.Default);
 
             fsr.Position = toc.fils[idx].pos;
@@ -335,8 +383,6 @@ namespace GCRebuilder_Console
                 b = brr.ReadBytes(curBR);
                 bww.Write(b);
 
-                
-
                 if (stopCurrProc)
                     break;
             }
@@ -345,14 +391,9 @@ namespace GCRebuilder_Console
             fsw.Close();
             brr.Close();
             fsr.Close();
-
-            
-
         }
 
-        private void ImportDir(int idx, string impPath)
-        {
-        }
+        private void ImportDir(int idx, string impPath) { }
 
         public void Import(string impPath)
         {
@@ -366,10 +407,13 @@ namespace GCRebuilder_Console
             sio.BinaryReader brr;
             sio.FileStream fsw;
             sio.BinaryWriter bww;
-            int oidx, nidx;
+            int oidx,
+                nidx;
             int maxLen;
             long endPos;
-            int maxBR, curBR, temBR;
+            int maxBR,
+                curBR,
+                temBR;
             bool showMsg = false;
             byte[] b;
 
@@ -381,18 +425,32 @@ namespace GCRebuilder_Console
             fi = new sio.FileInfo(impPath);
             oidx = toc.fils[idx].prevIdx;
             for (nidx = oidx + 1; nidx < toc.fils.Count - 1; nidx++)
-                if (!toc.fils[nidx].isDir) break;
+                if (!toc.fils[nidx].isDir)
+                    break;
             maxLen = toc.fils[toc.fils[nidx].nextIdx].pos;
-            maxLen = (nidx == toc.lastIdx) ? toc.totalLen - toc.fils[idx].pos : maxLen - toc.fils[idx].pos;
+            maxLen =
+                (nidx == toc.lastIdx)
+                    ? toc.totalLen - toc.fils[idx].pos
+                    : maxLen - toc.fils[idx].pos;
             endPos = toc.fils[idx].pos + maxLen;
             if (fi.Length > maxLen)
             {
                 return;
             }
 
-            fsr = new sio.FileStream(impPath, sio.FileMode.Open, sio.FileAccess.Read, sio.FileShare.Read);
+            fsr = new sio.FileStream(
+                impPath,
+                sio.FileMode.Open,
+                sio.FileAccess.Read,
+                sio.FileShare.Read
+            );
             brr = new sio.BinaryReader(fsr, ste.Default);
-            fsw = new sio.FileStream(imgPath, sio.FileMode.Open, sio.FileAccess.Write, sio.FileShare.None);
+            fsw = new sio.FileStream(
+                imgPath,
+                sio.FileMode.Open,
+                sio.FileAccess.Write,
+                sio.FileShare.None
+            );
             bww = new sio.BinaryWriter(fsw, ste.Default);
 
             fsw.Position = toc.fils[idx].pos;
@@ -413,7 +471,7 @@ namespace GCRebuilder_Console
                 bww.Write(b);
 
                 if (escapePressed)
-                        stopCurrProc = true;
+                    stopCurrProc = true;
 
                 if (stopCurrProc)
                     break;
@@ -438,10 +496,7 @@ namespace GCRebuilder_Console
             fsw.Close();
             brr.Close();
             fsr.Close();
-
         }
-
-        
 
         //private void SaveTOC()
         //{
@@ -458,9 +513,5 @@ namespace GCRebuilder_Console
         //    sw.Close();
         //    fs.Close();
         //}
-
-        
-
-        
     }
 }
