@@ -1,12 +1,14 @@
-# GameCube Rebuilder
+# GameCube Rebuilder - Console Branch
 
 ## Description
 
-GCR is a tool that allows you to edit Nintendo GameCube images.
+GCR is a tool that allows you to edit Nintendo GameCube images. The console branch does not utilize a GUI and works for Mac OS and Linux Operating Systems
 
-## Building
+## Running
 
-GCR can be built via any C# IDE or a CLI command like `msbuild GCRebuilder.sln`
+You will need to install the latest version of .NET Core which can be found here: https://dotnet.microsoft.com/en-us/download
+Once it is installed, you can run the project by running the following command in the `GCRebuilder` folder: 
+`dotnet run --project ./GCRebuilder_Console.csproj <args>`
 
 ## Usage
 
